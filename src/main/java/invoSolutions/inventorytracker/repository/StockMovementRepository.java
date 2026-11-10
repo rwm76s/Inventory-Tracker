@@ -1,4 +1,4 @@
-package invoSolutions.inventorytracker.mapper;
+package invoSolutions.inventorytracker.repository;
 
 import invoSolutions.inventorytracker.model.StockMovement;
 import org.springframework.data.domain.Page;
@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface StockMovementRepository extends JpaRepository<StockMovement, Long> {
 
@@ -25,4 +26,7 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
 
     /** Newest first; id breaks ties so ordering is stable for equal timestamps. */
     Page<StockMovement> findByProductIdOrderByOccurredAtDescIdDesc(Long productId, Pageable pageable);
+
+    /** Everything strictly after the instant, in ledger order; used to replay balances forward. */
+    List<StockMovement> findByProductIdAndOccurredAtAfterOrderByOccurredAtAscIdAsc(Long productId, Instant after);
 }

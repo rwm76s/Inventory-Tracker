@@ -19,7 +19,7 @@ import java.time.Instant;
 // The database itself rejects a sign that contradicts the type.
 @Check(constraints = "quantity_delta <> 0 AND ("
         + "(movement_type = 'RECEIPT' AND quantity_delta > 0) OR "
-        + "(movement_type = 'ISSUE' AND quantity_delta < 0) OR "
+        + "(movement_type = 'FULFILLMENT' AND quantity_delta < 0) OR "
         + "movement_type = 'ADJUSTMENT')")
 public class StockMovement {
 

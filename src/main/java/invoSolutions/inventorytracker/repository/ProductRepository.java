@@ -1,4 +1,4 @@
-package invoSolutions.inventorytracker.mapper;
+package invoSolutions.inventorytracker.repository;
 
 import invoSolutions.inventorytracker.model.Product;
 import jakarta.persistence.LockModeType;

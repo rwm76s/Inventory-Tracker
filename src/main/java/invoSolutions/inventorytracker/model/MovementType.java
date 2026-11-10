@@ -6,13 +6,13 @@ package invoSolutions.inventorytracker.model;
  */
 public enum MovementType {
     RECEIPT,     // stock comes in  -> delta > 0
-    ISSUE,       // stock goes out  -> delta < 0
+    FULFILLMENT,       // stock goes out  -> delta < 0
     ADJUSTMENT;  // correction      -> delta != 0 (either direction)
 
     public boolean acceptsDelta(int delta) {
         return switch (this) {
             case RECEIPT -> delta > 0;
-            case ISSUE -> delta < 0;
+            case FULFILLMENT -> delta < 0;
             case ADJUSTMENT -> delta != 0;
         };
     }
