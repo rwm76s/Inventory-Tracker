@@ -1,4 +1,4 @@
-package invoSolutions.inventorytracker.domain;
+package invoSolutions.inventorytracker.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
@@ -11,12 +11,12 @@ import java.time.Instant;
  * never by editing or deleting a row, so history is always trustworthy.
  */
 @Entity
-@Immutable // Records cannot be deleted
+@Immutable // Ignores updates
 @Table(name = "stock_movement",
-        // Serves both "history for a product" and "on-hand as of a date" queries.
+        // Handles both "history for a product" and "on-hand as of a date" queries.
         indexes = @Index(name = "idx_movement_product_occurred", columnList = "product_id, occurred_at")
 )
-// Second line of defence: the database itself rejects a sign that contradicts the type.
+// The database itself rejects a sign that contradicts the type.
 @Check(constraints = "quantity_delta <> 0 AND ("
         + "(movement_type = 'RECEIPT' AND quantity_delta > 0) OR "
         + "(movement_type = 'ISSUE' AND quantity_delta < 0) OR "
@@ -27,7 +27,7 @@ public class StockMovement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // LAZY so listing movements doesn't drag in a full Product row each time.
+    // Lazy fetch so listing movements doesn't drag in a full Product row each time.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false, updatable = false)
     private Product product;
@@ -37,7 +37,7 @@ public class StockMovement {
     @Column(name = "movement_type", nullable = false, updatable = false, length = 20)
     private MovementType type;
 
-    // Signed: positive = in, negative = out. One column makes on-hand a simple SUM.
+    // positive = in, negative = out. One column makes on-hand a simple SUM.
     @Column(nullable = false, updatable = false)
     private int quantityDelta;
 
@@ -48,7 +48,7 @@ public class StockMovement {
     @Column(length = 500, updatable = false)
     private String note;
 
-    // When the stock actually moved (may be backdated)...
+    // When the stock actually moved...
     @Column(nullable = false, updatable = false)
     private Instant occurredAt;
 
@@ -56,7 +56,6 @@ public class StockMovement {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    // Timestamp for all stock movement
     @Column(nullable = false, updatable = false, length = 100)
     private String createdBy;
 
@@ -91,12 +90,21 @@ public class StockMovement {
     }
 
     public Long getId() { return id; }
+
     public Product getProduct() { return product; }
+
     public MovementType getType() { return type; }
+
     public int getQuantityDelta() { return quantityDelta; }
+
     public MovementReason getReason() { return reason; }
+
     public String getNote() { return note; }
+
     public Instant getOccurredAt() { return occurredAt; }
+
     public Instant getCreatedAt() { return createdAt; }
+
     public String getCreatedBy() { return createdBy; }
+
 }

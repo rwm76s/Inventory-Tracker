@@ -1,4 +1,40 @@
-FROM ubuntu:latest
-LABEL authors="rmcgr"
+services:
+  app:
+    build: .
+    container_name: inventory-app
+    depends_on:
+      db:
+        condition: service_healthy   # waits for the db health check
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      # Inside the compose network the db listens on 5432 no matter what DB_PORT maps on the host.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-inventory}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-inventory}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-inventory}
+      # Hibernate builds tables from the entities
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
-ENTRYPOINT ["top", "-b"]
+  db:
+    image: postgres:16-alpine
+    container_name: inventory-db
+    environment:
+      # Defaults let a clean checkout work.
+      POSTGRES_DB: ${POSTGRES_DB:-inventory}
+      POSTGRES_USER: ${POSTGRES_USER:-inventory}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inventory}
+    ports:
+      # Host port is configurable: a local Postgres for port 5432
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # Named volume (not a bind mount) so data survives container rebuilds
+      - inventory_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Lets the app service later use depends_on: condition: service_healthy.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  inventory_pgdata:
