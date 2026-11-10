@@ -1,4 +1,4 @@
-package invoSolutions.inventorytracker.domain;
+package invoSolutions.inventorytracker.model;
 
 /**
  * What kind of stock movement this is. The type constrains the sign of the

@@ -1,4 +1,4 @@
-package invo.solutions.inventorytracker;
+package invoSolutions.inventorytracker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

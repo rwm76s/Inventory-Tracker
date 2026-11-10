@@ -1,4 +1,4 @@
-package invoSolutions.inventorytracker.domain;
+package invoSolutions.inventorytracker.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -48,13 +48,13 @@ public class Product {
     @Column(nullable = false)
     private boolean active = true;
 
-    // Timestamp for all stock movement
+    // Timestamp for all stock creations
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
     protected Product() { } // required by JPA
 
-    public Product(String sku, String name, String unit, int reorderPoint) {
+    public Product(String sku, String name, int reorderPoint) {
         this.sku = sku;
         this.name = name;
         this.reorderThreshold = reorderPoint;
