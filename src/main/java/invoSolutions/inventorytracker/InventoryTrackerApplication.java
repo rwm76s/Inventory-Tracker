@@ -1,4 +1,4 @@
-package invo.solutions.inventorytracker;
+package invoSolutions.inventorytracker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
