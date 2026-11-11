@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 public interface StockMovementRepository extends JpaRepository<StockMovement, Long> {
@@ -29,4 +30,18 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
 
     /** Everything strictly after the instant, in ledger order; used to replay balances forward. */
     List<StockMovement> findByProductIdAndOccurredAtAfterOrderByOccurredAtAscIdAsc(Long productId, Instant after);
+
+    /** One row per product, for a whole page of products at once (avoids a SUM query per product). */
+    interface OnHandRow {
+        Long getProductId();
+        Long getOnHand();
+    }
+
+    @Query("""
+       select m.product.id as productId, sum(m.quantityDelta) as onHand
+       from StockMovement m
+       where m.product.id in :ids
+       group by m.product.id
+       """)
+    List<OnHandRow> onHandForProducts(@Param("ids") Collection<Long> ids);
 }
