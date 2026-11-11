@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory Tracker</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+
+<main>
+  <h1>Inventory Tracker</h1>
+  <p class="lead">See what's in stock and how it changed over time.</p>
+
+  <div class="cards">
+    <a class="card" th:href="@{/products}">
+      <h2>Products</h2>
+      <p>Current stock levels and status for every product.</p>
+    </a>
+    <a class="card" th:href="@{/movements}">
+      <h2>Movements</h2>
+      <p>Every stock change, newest first: what moved, when, and why.</p>
+    </a>
+  </div>
+</main>
+</body>
+</html>

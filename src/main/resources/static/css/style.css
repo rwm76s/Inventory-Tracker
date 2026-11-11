@@ -1,0 +1,56 @@
+/* Colors live in variables so a rebrand (or a live "make it green") is a one-line change. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c2430;
+  --muted: #5f6b7a;
+  --border: #e1e5ea;
+  --accent: #2563eb;
+}
+
+* { box-sizing: border-box; } /* padding never makes an element wider than its set width */
+
+/* System font stack: no font download, so the page renders instantly and works offline. */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; color: var(--text); text-decoration: none; }
+.topbar nav a { margin-left: 1.25rem; color: var(--muted); text-decoration: none; }
+.topbar nav a:hover { color: var(--accent); }
+
+/* Centered, capped width keeps lines readable on wide monitors (e.g. a projector). */
+main { max-width: 64rem; margin: 2rem auto; padding: 0 1.5rem; }
+.lead { color: var(--muted); }
+
+/* auto-fit: cards sit side by side when there's room and stack when there isn't, no media query needed. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.card {
+  display: block;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+.card:hover { border-color: var(--accent); }
+.card h2 { margin: 0 0 0.25rem; color: var(--accent); }
+.card p { margin: 0; color: var(--muted); }
