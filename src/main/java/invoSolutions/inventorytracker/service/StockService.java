@@ -4,6 +4,8 @@ import invoSolutions.inventorytracker.exceptions.*;
 import invoSolutions.inventorytracker.model.*;
 import invoSolutions.inventorytracker.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -70,6 +72,12 @@ public class StockService {
         if (cmd.reason() == MovementReason.OTHER && (cmd.note() == null || cmd.note().isBlank())) {
             throw new InvalidMovementException("A note is required when the reason is OTHER");
         }
+    }
+
+    @Transactional()
+    public Page<StockMovement> history(Long productId, Pageable pageable) {
+        if (!products.existsById(productId)) throw new ProductNotFoundException(productId);
+        return movements.findByProductIdOrderByOccurredAtDescIdDesc(productId, pageable);
     }
 
     /**

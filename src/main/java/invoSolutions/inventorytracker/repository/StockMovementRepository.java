@@ -13,6 +13,8 @@ import java.util.List;
 
 public interface StockMovementRepository extends JpaRepository<StockMovement, Long> {
 
+    StockMovement save(StockMovement movement);
+
     /** Current on-hand: the sum of every delta ever recorded for the product. */
     @Query("select coalesce(sum(m.quantityDelta), 0L) from StockMovement m where m.product.id = :productId")
     long onHand(@Param("productId") Long productId);
