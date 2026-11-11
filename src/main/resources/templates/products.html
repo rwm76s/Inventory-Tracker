@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+
+<main>
+  <h1>Products</h1>
+
+  <!-- A GET form puts the filters in the URL, so a filtered view can be bookmarked or shared. -->
+  <form class="filters" th:action="@{/products}" method="get">
+    <input type="search" name="q" th:value="${q}" placeholder="Search name or SKU">
+    <select name="status">
+      <option value="">All statuses</option>
+      <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"
+              th:selected="${s == status}"></option>
+    </select>
+    <button type="submit">Filter</button>
+    <a th:if="${not #strings.isEmpty(q) or status != null}" th:href="@{/products}">Clear</a>
+  </form>
+
+  <div class="table-wrap" th:if="${not products.isEmpty()}">
+    <table>
+      <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Name</th>
+        <th class="num">On hand</th>
+        <th class="num">Reorder at</th>
+        <th class="num">Unit cost</th>
+        <th>Status</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="p : ${products}" th:classappend="${!p.product().active} ? 'inactive'">
+        <td th:text="${p.product().sku}">SKU</td>
+        <td>
+          <span th:text="${p.product().name}">Name</span>
+          <span class="tag" th:unless="${p.product().active}">Discontinued</span>
+        </td>
+        <td class="num" th:text="${p.onHand()}">0</td>
+        <td class="num" th:text="${p.product().reorderThreshold}">0</td>
+        <td class="num">
+              <span th:if="${p.product().unitCost != null}"
+                    th:text="${#numbers.formatCurrency(p.product().unitCost)}">$0.00</span>
+          <span class="muted" th:if="${p.product().unitCost == null}">—</span>
+        </td>
+        <td>
+          <!-- Class is badge-<ENUM NAME>, so a new status only needs a matching CSS rule. -->
+          <span class="badge" th:classappend="'badge-' + ${p.status().name()}"
+                th:text="${p.status().label}">Status</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="muted" th:if="${products.isEmpty()}">No products match.</p>
+</main>
+</body>
+</html>
