@@ -1,5 +1,6 @@
 package invoSolutions.inventorytracker.repository;
 
+import invoSolutions.inventorytracker.model.MovementType;
 import invoSolutions.inventorytracker.model.StockMovement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,9 +28,6 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
            """)
     long onHandAsOf(@Param("productId") Long productId, @Param("asOf") Instant asOf);
 
-    /** Newest first; id breaks ties so ordering is stable for equal timestamps. */
-    Page<StockMovement> findByProductIdOrderByOccurredAtDescIdDesc(Long productId, Pageable pageable);
-
     /** Everything strictly after the instant, in ledger order; used to replay balances forward. */
     List<StockMovement> findByProductIdAndOccurredAtAfterOrderByOccurredAtAscIdAsc(Long productId, Instant after);
 
@@ -46,4 +44,17 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
        group by m.product.id
        """)
     List<OnHandRow> onHandForProducts(@Param("ids") Collection<Long> ids);
+
+    @Query("""
+       select m from StockMovement m
+       where m.product.id = :productId
+         and m.occurredAt >= :from and m.occurredAt < :to
+         and m.type in :types
+       order by m.occurredAt desc, m.id desc
+       """)
+    Page<StockMovement> search(@Param("productId") Long productId,
+                               @Param("from") Instant from,
+                               @Param("to") Instant to,
+                               @Param("types") Collection<MovementType> types,
+                               Pageable pageable);
 }

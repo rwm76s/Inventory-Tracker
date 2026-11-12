@@ -1,16 +1,17 @@
 /* Colors live in variables so a rebrand (or a live "make it green") is a one-line change. */
 :root {
-  --bg: #f6f7f9;
+  --bg: #f4f5f9;
   --surface: #ffffff;
   --text: #1c2430;
   --muted: #5f6b7a;
-  --border: #e1e5ea;
-  --accent: #2563eb;
+  --border: #d5dae1;
+  --accent: #3730a3;       /* deep indigo: strong contrast under white text on the top bar */
+  --accent-soft: #eef0fb;  /* table header and hover tint */
 }
 
 * { box-sizing: border-box; } /* padding never makes an element wider than its set width */
 
-/* System font stack: no font download, so the page renders instantly and works offline. */
+/* System font stack: no font download, so pages render instantly and work offline. */
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -19,65 +20,106 @@ body {
   line-height: 1.5;
 }
 
+/* A solid top bar makes the current app obvious at a glance, like the reference. */
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1.5rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--accent);
 }
-.brand { font-weight: 700; color: var(--text); text-decoration: none; }
-.topbar nav a { margin-left: 1.25rem; color: var(--muted); text-decoration: none; }
-.topbar nav a:hover { color: var(--accent); }
+.brand { font-weight: 700; color: #fff; text-decoration: none; }
+.topbar nav a { margin-left: 1.25rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; }
+.topbar nav a:hover { color: #fff; }
 
-/* Centered, capped width keeps lines readable on wide monitors (e.g. a projector). */
-main { max-width: 64rem; margin: 2rem auto; padding: 0 1.5rem; }
+/* Wider than a text page because the movements table has eight columns. */
+main { max-width: 76rem; margin: 1.5rem auto; padding: 0 1.5rem; }
+h1 { margin: 0 0 1rem; }
 .lead { color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
 
-/* auto-fit: cards sit side by side when there's room and stack when there isn't, no media query needed. */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 1rem;
-  margin-top: 2rem;
-}
-.card {
-  display: block;
-  padding: 1.25rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  color: inherit;
-  text-decoration: none;
-}
-.card:hover { border-color: var(--accent); }
-.card h2 { margin: 0 0 0.25rem; color: var(--accent); }
-.card p { margin: 0; color: var(--muted); }
-
-/* ---- Products page ---- */
-
-/* Filter controls wrap onto a second line on narrow screens instead of overflowing. */
-.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 1rem 0; }
-.filters input, .filters select, .filters button {
+/* Controls ignore the page font by default; inheriting keeps them consistent. */
+input, select, button {
+  font: inherit;
   padding: 0.45rem 0.6rem;
-  font: inherit; /* form controls ignore the page font by default */
   border: 1px solid var(--border);
   border-radius: 0.375rem;
   background: var(--surface);
   color: var(--text);
 }
-.filters button { background: var(--accent); border-color: var(--accent); color: #fff; cursor: pointer; }
+button {
+background: var(--accent);
+border-color: var(--accent);
+color: #fff;
+cursor: pointer; }
+
+label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--muted); }
+
+/* Forms are wrapping rows: fields drop to a new line on narrow screens with no media query. */
+.filters, .search, .inline-form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; }
+.filters { margin: 1rem 0; }
+
+/* Search panel: selection summary on the left, search on the right; wraps when narrow. */
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+.selection { flex: 1 1 16rem; border-left: 3px solid var(--accent); padding-left: 1rem; font-size: 0.9rem; }
+.selection .label { font-weight: 600; color: var(--muted); }
+.selection-name { font-size: 1.1rem; font-weight: 600; color: var(--accent); }
+.search { flex: 3 1 28rem; }
+
+/* Messages are colored AND worded, same reasoning as the status badges. */
+.alert { padding: 0.6rem 0.9rem; border-radius: 0.375rem; margin: 1rem 0; }
+.alert-success { background: #dcfce7; color: #166534; }
+.alert-error { background: #fee2e2; color: #991b1b; }
+
+details.record { margin: 1rem 0; }
+details.record summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+.inline-form { margin: 0.75rem 0 0.5rem; }
 
 /* Wide tables scroll sideways inside this box rather than stretching the whole page on a phone. */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
-th, td { padding: 0.6rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
-th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.table-wrap {
+overflow-x: auto;
+}
+/* min-width: columns stay spaced out; on a narrow screen the table scrolls sideways
+   (inside .table-wrap) instead of squeezing columns until their text touches. */
+table {
+width: 100%;
+min-width: 48rem;
+border-collapse: collapse;
+background: var(--surface);
+border: 2px solid #333;
+}
 
-/* Numbers are right-aligned with equal-width digits so columns line up and compare at a glance. */
-.num { text-align: right; font-variant-numeric: tabular-nums; }
-.muted { color: var(--muted); }
+/* Roomy padding + centered text, so no cell's content touches its gridlines or its neighbors. */
+th, td {
+padding: 0.85rem 1.25rem;
+text-align: center;
+vertical-align: middle;
+border: 2px solid #333;
+}
+th {
+font-size: 0.8rem;
+background: var(--accent-soft);
+color: var(--text);
+}
+tbody tr:hover {
+background: var(--accent-soft);
+}
+
+.num { font-variant-numeric: tabular-nums; }
+/* The +/- sign already carries the meaning; color is only reinforcement. */
+.delta-in { color: #166534; font-weight: 600; }
+.delta-out { color: #991b1b; font-weight: 600; }
 
 /* Status shows as text AND color, so it stays readable for color-blind viewers or a washed-out projector. */
 .badge { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
@@ -88,3 +130,13 @@ th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color
 /* Discontinued rows fade so active inventory stands out, but stay visible because their history still matters. */
 tr.inactive td { color: var(--muted); }
 .tag { margin-left: 0.4rem; padding: 0.05rem 0.4rem; border: 1px solid var(--border); border-radius: 0.25rem; font-size: 0.7rem; }
+
+.pick-list { line-height: 2; }
+.pager { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+
+/* Index page cards. auto-fit: side by side when there's room, stacked when there isn't. */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin-top: 2rem;}
+.card { display: block; padding: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; color: inherit; text-decoration: none; }
+.card:hover { border-color: var(--accent); }
+.card h2 { margin: 0 0 0.25rem; color: var(--accent); }
+.card p { margin: 0; color: var(--muted); }

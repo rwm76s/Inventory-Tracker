@@ -61,6 +61,6 @@ public class ProductApiController {
     public PagedModel<MovementResponse> history(@PathVariable Long id,
                                                 @PageableDefault(size = 20) Pageable pageable) {
         // PagedModel gives stable JSON ({content, page}); returning Spring's Page directly is discouraged.
-        return new PagedModel<>(stock.history(id, pageable).map(MovementResponse::from));
+        return new PagedModel<>(stock.history(id, null, null, null, pageable).map(MovementResponse::from));
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class StockService {
@@ -74,10 +75,15 @@ public class StockService {
         }
     }
 
-    @Transactional()
-    public Page<StockMovement> history(Long productId, Pageable pageable) {
+    @Transactional
+    public Page<StockMovement> history(Long productId, Instant from, Instant to,
+                                       MovementType type, Pageable pageable) {
         if (!products.existsById(productId)) throw new ProductNotFoundException(productId);
-        return movements.findByProductIdOrderByOccurredAtDescIdDesc(productId, pageable);
+        // A missing filter means "no limit": wide bounds / every type, so the query never has to handle null parameters.
+        Instant start = (from != null) ? from : Instant.EPOCH;
+        Instant end = (to != null) ? to : Instant.parse("9999-12-31T00:00:00Z");
+        List<MovementType> types = (type != null) ? List.of(type) : List.of(MovementType.values());
+        return movements.search(productId, start, end, types, pageable);
     }
 
     /**

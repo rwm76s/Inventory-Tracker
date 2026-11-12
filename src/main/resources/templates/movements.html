@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Movements</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+
+<main>
+    <h1>Movements</h1>
+
+    <p class="alert alert-success" th:if="${success != null}" th:text="${success}"></p>
+    <p class="alert alert-error" th:if="${error != null}" th:text="${error}"></p>
+
+    <section class="panel">
+        <!-- Left: what is selected. Right: the search. Same layout idea as the reference screenshot. -->
+        <div class="selection" th:if="${product != null}">
+            <div class="label">Selection</div>
+            <div class="selection-name" th:text="${product.product().name}">Name</div>
+            <div>SKU: <span th:text="${product.product().sku}">SKU</span></div>
+            <div>Reorder at: <span th:text="${product.product().reorderThreshold}">0</span></div>
+            <div>
+                On hand: <strong th:text="${product.onHand()}">0</strong>
+                <span class="badge" th:classappend="'badge-' + ${product.status().name()}"
+                      th:text="${product.status().label}">Status</span>
+            </div>
+        </div>
+
+        <form class="search" th:action="@{/movements}" method="get">
+            <label>Item (name or SKU)
+                <input type="search" name="q" th:value="${q}" placeholder="Name or SKU" autofocus>
+            </label>
+            <label>From
+                <input type="date" name="from" th:value="${from}">
+            </label>
+            <label>To
+                <input type="date" name="to" th:value="${to}">
+            </label>
+            <label>Type
+                <select name="type">
+                    <option value="">All</option>
+                    <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t == type}"></option>
+                </select>
+            </label>
+            <button type="submit">Lookup</button>
+        </form>
+    </section>
+
+    <!-- Nothing is shown until a search happens. -->
+    <p class="muted" th:if="${product == null and matches == null}">
+        Search by product name or SKU to see its movements.
+    </p>
+    <p class="muted" th:if="${matches != null and matches.isEmpty()}">No products match that search.</p>
+
+    <section th:if="${matches != null and not matches.isEmpty()}">
+        <p>Several products match. Choose one:</p>
+        <ul class="pick-list">
+            <li th:each="m : ${matches}">
+                <a th:href="@{/movements(productId=${m.product().id}, from=${from}, to=${to}, type=${type})}"
+                   th:text="${m.product().sku + ' — ' + m.product().name}">SKU — Name</a>
+            </li>
+        </ul>
+    </section>
+
+    <section th:if="${product != null}">
+        <!-- <details> gives a collapsible form with no JavaScript. -->
+        <details class="record">
+            <summary>Record a movement</summary>
+            <form class="inline-form" th:action="@{/movements}" method="post">
+                <input type="hidden" name="productId" th:value="${product.product().id}">
+                <label>Type
+                    <select name="type">
+                        <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+                    </select>
+                </label>
+                <label>Quantity
+                    <input type="number" name="quantity" required>
+                </label>
+                <label>Reason
+                    <select name="reason">
+                        <option th:each="r : ${reasons}" th:value="${r}"
+                                th:text="${#strings.replace(r, '_', ' ')}"></option>
+                    </select>
+                </label>
+                <label>Note
+                    <input type="text" name="note" maxlength="500">
+                </label>
+                <label>When (blank = now)
+                    <input type="datetime-local" name="occurredAt">
+                </label>
+                <button type="submit">Record</button>
+            </form>
+            <p class="muted small">
+                Receipt and fulfillment: type a positive number, the type sets the direction.
+                Adjustment: use a negative number to remove stock.
+            </p>
+        </details>
+
+        <p class="muted" th:if="${history.isEmpty()}">No movements found for this selection.</p>
+
+        <div class="table-wrap" th:if="${not history.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Occurred</th>
+                    <th>Recorded</th>
+                    <th>Reference</th>
+                    <th class="num">Qty</th>
+                    <th>Reason</th>
+                    <th>Note</th>
+                    <th>By</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${history.content}">
+                    <td th:text="${m.type}">TYPE</td>
+                    <td th:text="${#temporals.format(m.occurredAt.atZone(zone), 'MM/dd/yyyy hh:mm a')}">When</td>
+                    <td th:text="${#temporals.format(m.createdAt.atZone(zone), 'MM/dd/yyyy hh:mm a')}">Entered</td>
+                    <td th:text="${m.reference}">MOV-000001</td>
+                    <td class="num" th:classappend="${m.quantityDelta > 0} ? 'delta-in' : 'delta-out'"
+                        th:text="${m.quantityDelta > 0 ? '+' + m.quantityDelta : m.quantityDelta}">+1</td>
+                    <td th:text="${#strings.replace(m.reason, '_', ' ')}">REASON</td>
+                    <td th:text="${m.note}">note</td>
+                    <td th:text="${m.createdBy}">by</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pager" th:if="${history.totalPages > 1}">
+            <a th:if="${history.hasPrevious()}"
+               th:href="@{/movements(productId=${product.product().id}, from=${from}, to=${to}, type=${type}, page=${history.number - 1})}">← Newer</a>
+            <span class="muted"
+                  th:text="'Page ' + ${history.number + 1} + ' of ' + ${history.totalPages} + ' (' + ${history.totalElements} + ' movements)'">Page 1 of 1</span>
+            <a th:if="${history.hasNext()}"
+               th:href="@{/movements(productId=${product.product().id}, from=${from}, to=${to}, type=${type}, page=${history.number + 1})}">Older →</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>
