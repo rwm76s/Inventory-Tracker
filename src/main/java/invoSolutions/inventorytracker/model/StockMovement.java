@@ -86,7 +86,7 @@ public class StockMovement {
      * unique by construction and needs no extra column or sequence. (Not persisted.)
      */
     public String getReference() {
-        return id == null ? null : String.format("MOV-%06d", id);
+        return id == null ? null : String.format("200%06d", id);
     }
 
     public Long getId() { return id; }

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 public record CreateProductCommand(
-        @NotBlank @Size(max = 64) String sku,
+        @NotBlank @Pattern(regexp = "\\d+", message = "SKU must contain numbers only") @Size(max = 12) String sku,
         @NotBlank @Size(max = 200) String name,
         @Size(max = 1000) String description,
 

@@ -42,7 +42,7 @@ class StockServiceTest {
 
     @BeforeEach
     void createProduct() {
-        product = products.save(new Product("SKU-1", "Widget", 5)); // reorder threshold = 5
+        product = products.save(new Product("6579430", "Widget", 5)); // reorder threshold = 5
     }
 
     // ---- helpers: tests read as a timeline instead of constructor noise ----
